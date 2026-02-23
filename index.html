@@ -932,52 +932,65 @@
         </div>
     </section>
 
-    <!-- Course Dates Section -->
+        <!-- Course Dates Section -->
     <section id="dates" class="dates">
         <div class="container">
             <div class="section-header">
                 <h2>Najbliższe Terminy Kursów</h2>
                 <p>Planowane rozpoczęcie kursów w najbliższym czasie</p>
             </div>
-            <div class="date-cards">
-                <div class="date-card">
-                    <h3>Kurs Podstawowy</h3>
-                    <div class="date-info">
-                        <i class="far fa-calendar-alt"></i>
-                        <span>25.09.2025</span>
-                    </div>
-                    <div class="date-info">
-                        <i class="far fa-clock"></i>
-                        <span>16:00</span>
-                    </div>
-                </div>
-
-                <div class="date-card">
-                    <h3>Kurs Rozszerzony</h3>
-                    <div class="date-info">
-                        <i class="far fa-calendar-alt"></i>
-                        <span>25.09.2025</span>
-                    </div>
-                    <div class="date-info">
-                        <i class="far fa-clock"></i>
-                        <span>16:00</span>
-                    </div>
-                </div>
-
-                <div class="date-card">
-                    <h3>Kurs Przyspieszony</h3>
-                    <div class="date-info">
-                        <i class="far fa-calendar-alt"></i>
-                        <span>Termin jest indywidualnie ustalany. Czas szkolenia od  trzech do czterech tygodni. </span>
-                    </div>
-                    <div class="date-info">
-                        <i class="far fa-clock"></i>
-                        <span>Wstępny kontakt telefoniczny</span>
-                    </div>
-                </div>
+            <div class="date-cards" id="date-cards-container">
+                <!-- Dates will be loaded from Google Sheets -->
+                <div style="text-align: center; padding: 20px;">Ładowanie terminów...</div>
             </div>
         </div>
     </section>
+    
+    <script>
+        (function() {
+            const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-F-mHcZ5XWosTE2f6pTuq0-VAUHntbsiMBcWvsmS0SPNjfTjVVQ0dzwsF3IXdNPKgKv_xm99JiOL8/pub?output=csv';
+    
+            fetch(sheetURL)
+                .then(response => response.text())
+                .then(csvText => {
+                    // Simple CSV parser (assumes headers and no commas inside fields)
+                    const lines = csvText.trim().split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim());
+                    const courses = lines.slice(1).map(line => {
+                        const values = line.split(',').map(v => v.trim());
+                        return {
+                            name: values[0],
+                            date: values[1],
+                            time: values[2]
+                        };
+                    });
+    
+                    const container = document.getElementById('date-cards-container');
+                    container.innerHTML = ''; // remove loading message
+    
+                    courses.forEach(course => {
+                        const card = document.createElement('div');
+                        card.className = 'date-card';
+                        card.innerHTML = `
+                            <h3>${course.name}</h3>
+                            <div class="date-info">
+                                <i class="far fa-calendar-alt"></i>
+                                <span>${course.date}</span>
+                            </div>
+                            <div class="date-info">
+                                <i class="far fa-clock"></i>
+                                <span>${course.time}</span>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Błąd ładowania terminów:', error);
+                    document.getElementById('date-cards-container').innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Nie udało się załadować terminów. Spróbuj później.</div>';
+                });
+        })();
+    </script>
 
     <!-- Cars Section -->
     <section id="cars">
